@@ -1,4 +1,4 @@
-import {IsBoolean, IsNumber, IsString} from "class-validator";
+import {IsBoolean, IsNumber, IsOptional, IsString} from "class-validator";
 
 export class CreateProductDto {
     @IsString({each: true})
@@ -9,5 +9,8 @@ export class CreateProductDto {
 
     @IsNumber()
     readonly price: number;
+
+    @IsOptional()
+    readonly user: object;
 }
 
