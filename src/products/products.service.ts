@@ -3,8 +3,7 @@ import {CreateProductDto} from './dto/create-product.dto';
 import {Product} from './entities/product.entity';
 import {JsonDB} from "node-json-db";
 import {Config} from "node-json-db/dist/lib/JsonDBConfig";
-
-const db = new JsonDB(new Config("ContentManageDB", true, false, '/'));
+import {db} from "../main"
 
 @Injectable()
 export class ProductsService {
