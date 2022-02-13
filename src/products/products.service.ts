@@ -60,8 +60,18 @@ export class ProductsService {
         }
     }
 
-    getPermitted() {
-        throw new Error('Method not implemented.');
+    getPermitted(@Request() req) {
+        if (req.body.user.authority === "editor") {
+            let permitted: Product;
+            try {
+                permitted = db.getData("/product/permitted");
+                return permitted;
+            } catch {
+                throw new NotFoundException(`products not found.`);
+            }
+        } else {
+            throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);
+        }
     }
 
     update(@Request() req, @Body() updateData: UpdateProductDto) {

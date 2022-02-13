@@ -22,8 +22,8 @@ export class ProductsController {
 
     //permission true 조회(editor)
     @Get('/permitted')
-    getPermitted() {
-        return this.productService.getPermitted();
+    getPermitted(@Request() req) {
+        return this.productService.getPermitted(req);
     }
 
     //permission true 조회(모든권한)
