@@ -6,9 +6,9 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     @IsNumber()
     readonly id: number;
 
-    @IsNumber()
+    @IsNumber({}, {each: true})
     @IsOptional()
-    readonly fee: number;
+    readonly fee: number[];
 
     @IsBoolean()
     @IsOptional()

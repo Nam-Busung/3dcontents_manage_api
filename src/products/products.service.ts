@@ -1,18 +1,30 @@
 import {Body, HttpException, HttpStatus, Injectable, NotFoundException, Request} from '@nestjs/common';
 import {CreateProductDto} from './dto/create-product.dto';
 import {UpdateProductDto} from './dto/update-product.dto';
+import {ListProductDto} from './dto/list-product.dto';
 
 import {Product} from './entities/product.entity';
 import {db} from "../main"
+import {Cron} from '@nestjs/schedule';
+import axios from "axios";
 
 @Injectable()
 export class ProductsService {
-    getMarketList() {
-        throw new Error('Method not implemented.');
+
+
+    //환율 갱신 cron
+    @Cron('0 0 * * *')
+    handleCron() {
+        axios.get('http://api.exchangeratesapi.io/v1/latest?access_key=4708af6aa231c77ba5382e47695281ed')
+            .then(res => {
+                db.push("/dollar", res.data.rates.USD / res.data.rates.KRW, true);
+                db.push("/yuan", res.data.rates.CNY / res.data.rates.KRW, true);
+            })
+            .catch(err => {
+                db.push("/dollar", 0.00083, true);
+                db.push("/yuan", 0.0053, true);
+            })
     }
-
-
-    //todo: 환율 갱신 cron 사용
 
     async create(@Request() req, @Body() productData: CreateProductDto) {
 
@@ -48,9 +60,8 @@ export class ProductsService {
 
     getNotPermitted(@Request() req) {
         if (req.body.user.authority === "editor") {
-            let notpermitted: Product;
             try {
-                notpermitted = db.getData("/product/notPermitted");
+                const notpermitted: Product = db.getData("/product/notPermitted");
                 return notpermitted;
             } catch {
                 throw new NotFoundException(`products not found.`);
@@ -62,15 +73,33 @@ export class ProductsService {
 
     getPermitted(@Request() req) {
         if (req.body.user.authority === "editor") {
-            let permitted: Product;
             try {
-                permitted = db.getData("/product/permitted");
+                const permitted: Product = db.getData("/product/permitted");
                 return permitted;
             } catch {
                 throw new NotFoundException(`products not found.`);
             }
         } else {
             throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    getMarketList() {
+        try {
+            const product = JSON.parse(JSON.stringify(db.getData("/product/permitted")));
+            const dollor = db.getData("/dollar");
+            const yuan = db.getData("/yuan");
+            const marketlist: ListProductDto[] = product.map(element => {
+                let marketproduct = element
+                marketproduct.price = [element.price, element.price * dollor, element.price * yuan];
+                marketproduct.fee = [element.fee, element.fee * dollor, element.fee * yuan];
+
+                const {title, description, price, fee} = marketproduct;
+                return {title, description, price, fee};
+            });
+            return marketlist;
+        } catch {
+            throw new NotFoundException(`products not found.`);
         }
     }
 
