@@ -15,7 +15,8 @@ export class ProductsModule implements NestModule {
             .apply(AuthMiddleware)
             .forRoutes(
                 {path: 'products', method: RequestMethod.POST},
-                {path: 'products/notpermitted', method: RequestMethod.GET}
+                {path: 'products/notpermitted', method: RequestMethod.GET},
+                {path: 'products/update', method: RequestMethod.PATCH}
             );
     }
 }

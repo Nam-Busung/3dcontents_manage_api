@@ -1,6 +1,7 @@
-import {Body, Controller, Get, Post, Request} from '@nestjs/common';
+import {Body, Controller, Get, Patch, Post, Request} from '@nestjs/common';
 import {ProductsService} from './products.service';
 import {CreateProductDto} from './dto/create-product.dto'
+import {UpdateProductDto} from './dto/update-product.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -19,14 +20,23 @@ export class ProductsController {
         return this.productService.getNotPermitted(req);
     }
 
-    //todo: permission true 조회(모든 권한 가능)
-    @Get()
+    //permission true 조회(editor)
+    @Get('/permitted')
     getPermitted() {
         return this.productService.getPermitted();
     }
 
-    //todo: update(editor)
+    //permission true 조회(모든권한)
+    @Get('/marketlist')
+    getMarketList() {
+        return this.productService.getMarketList();
+    }
 
+    //update(editor)
+    @Patch('/update')
+    patch(@Request() req, @Body() productData: UpdateProductDto) {
+        return this.productService.update(req, productData);
+    }
 
 
 }

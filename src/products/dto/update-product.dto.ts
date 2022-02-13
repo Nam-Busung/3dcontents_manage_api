@@ -4,9 +4,14 @@ import {CreateProductDto} from './create-product.dto';
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {
     @IsNumber()
-    readonly fee?: number;
+    readonly id: number;
+
+    @IsNumber()
+    @IsOptional()
+    readonly fee: number;
 
     @IsBoolean()
-    readonly permission?: boolean;
+    @IsOptional()
+    readonly permission: boolean;
 
 }
