@@ -9,6 +9,4 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     @IsBoolean()
     readonly permission?: boolean;
 
-    @IsOptional()
-    readonly user: object;
 }
