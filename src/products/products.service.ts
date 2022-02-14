@@ -27,11 +27,7 @@ export class ProductsService {
     }
 
     async create(@Request() req, @Body() productData: CreateProductDto) {
-
-        if (req.body.user.authority === "artist") {
-            //임시저장 User 삭제
-            delete req.body.user;
-            productData = req.body;
+        if (req.forwardingUser.authority === "artist") {
 
             let productCnt: number;
             try {
@@ -59,7 +55,7 @@ export class ProductsService {
     }
 
     getNotPermitted(@Request() req) {
-        if (req.body.user.authority === "editor") {
+        if (req.forwardingUser.authority === "editor") {
             try {
                 const notpermitted: Product = db.getData("/product/notPermitted");
                 return notpermitted;
@@ -72,7 +68,7 @@ export class ProductsService {
     }
 
     getPermitted(@Request() req) {
-        if (req.body.user.authority === "editor") {
+        if (req.forwardingUser.authority === "editor") {
             try {
                 const permitted: Product = db.getData("/product/permitted");
                 return permitted;
@@ -104,10 +100,7 @@ export class ProductsService {
     }
 
     update(@Request() req, @Body() updateData: UpdateProductDto) {
-        if (req.body.user.authority === "editor") {
-            //임시저장 User 삭제
-            delete req.body.user;
-            updateData = req.body;
+        if (req.forwardingUser.authority === "editor") {
 
             if (db.getIndex("/product/notPermitted", updateData.id) !== -1) {
                 const product = db.getData("/product/notPermitted[" + db.getIndex("/product/notPermitted", updateData.id) + "]");

@@ -3,14 +3,19 @@ import {HttpStatus, Injectable, NestMiddleware} from '@nestjs/common';
 import {NextFunction, Request, Response} from 'express';
 import * as jwt from 'jsonwebtoken';
 import {SECRET} from '../config';
+import {User} from './entities/user.entity'
 import {UserService} from './user.service';
+
+interface RequestModel extends Request {
+    forwardingUser: User
+}
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
     constructor(private readonly userService: UserService) {
     }
 
-    async use(req: Request, res: Response, next: NextFunction) {
+    async use(req: RequestModel, res: Response, next: NextFunction) {
 
         try {
             const token = req.headers.authorization;
@@ -19,7 +24,7 @@ export class AuthMiddleware implements NestMiddleware {
             if (!user) {
                 throw new HttpException('User not found.', HttpStatus.UNAUTHORIZED);
             }
-            req.body.user = user;
+            req.forwardingUser = user;
             next();
         } catch (error) {
             throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);
