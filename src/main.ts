@@ -1,12 +1,10 @@
 import {ValidationPipe} from '@nestjs/common';
 import {NestFactory} from '@nestjs/core';
 import axios from 'axios';
-import {JsonDB} from 'node-json-db';
-import {Config} from 'node-json-db/dist/lib/JsonDBConfig';
+import {db} from './config'
 import {AppModule} from './app.module';
 import {User} from './user/entities/user.entity'
 
-export const db = new JsonDB(new Config("ContentManageDB", true, false, '/'));
 
 
 async function bootstrap() {

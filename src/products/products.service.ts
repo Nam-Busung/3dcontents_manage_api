@@ -4,7 +4,7 @@ import {UpdateProductDto} from './dto/update-product.dto';
 import {ListProductDto} from './dto/list-product.dto';
 
 import {Product} from './entities/product.entity';
-import {db} from "../main"
+import {db} from "../config"
 import {Cron} from '@nestjs/schedule';
 import axios from "axios";
 

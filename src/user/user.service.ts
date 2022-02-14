@@ -1,5 +1,5 @@
 import {Body, Injectable, NotFoundException, Response} from '@nestjs/common';
-import {db} from '../main'
+import {db} from "../config"
 import {User} from './entities/user.entity'
 import * as jwt from 'jsonwebtoken';
 import {LoginUserDto} from './dto/login-user.dto';
