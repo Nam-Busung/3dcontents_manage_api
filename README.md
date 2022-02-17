@@ -11,4 +11,4 @@ to run
 
 
 to test<br/>(before test, delete 'ContentManageDB.json' or modify config.ts file to create new json file with different name)
-1. npm run test:watch
+1. npm run test
