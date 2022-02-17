@@ -7,7 +7,7 @@ Some APIs need specific authority to access them.<br/>
 to run
 1. npm install
 2. npm run start
--> ContentManageDB.json file will be made and test user 1(artist),2(editor),3(client) will be added to it.
+-> will make ContentManageDB.json file and test user 1(artist),2(editor),3(client) will be added to it.
 
 
 to test<br/>(before test, delete 'ContentManageDB.json' or modify config.js file to create new json file with different name)
