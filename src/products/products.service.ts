@@ -2,6 +2,7 @@ import {Body, HttpException, HttpStatus, Injectable, NotFoundException, Request}
 import {CreateProductDto} from './dto/create-product.dto';
 import {UpdateProductDto} from './dto/update-product.dto';
 import {ListProductDto} from './dto/list-product.dto';
+import {DeleteProductDto} from './dto/delete-product.dto';
 
 import {Product} from './entities/product.entity';
 import {db} from "../config"
@@ -14,8 +15,8 @@ export class ProductsService {
 
     //환율 갱신 cron
     @Cron('0 0 * * *')
-    handleCron() {
-        axios.get('http://api.exchangeratesapi.io/v1/latest?access_key=4708af6aa231c77ba5382e47695281ed')
+    async getExchangeRate() {
+        await axios.get('http://api.exchangeratesapi.io/v1/latest?access_key=4708af6aa231c77ba5382e47695281ed')
             .then(res => {
                 db.push("/dollar", res.data.rates.USD / res.data.rates.KRW, true);
                 db.push("/yuan", res.data.rates.CNY / res.data.rates.KRW, true);
@@ -24,6 +25,7 @@ export class ProductsService {
                 db.push("/dollar", 0.00083, true);
                 db.push("/yuan", 0.0053, true);
             })
+        return 'succeed'
     }
 
     async create(@Request() req, @Body() productData: CreateProductDto) {
@@ -31,14 +33,19 @@ export class ProductsService {
 
             let productCnt: number;
             try {
-                productCnt = db.getData("/product/notPermitted").length + db.getData("/product/permitted").length;
+                productCnt = db.getData("/product/notPermitted").length + db.getData("/product/permitted").length + db.getData("/product/deleted").length;
             } catch {
                 try {
-                    productCnt = db.getData("/product/notPermitted").length
+                    productCnt = db.getData("/product/notPermitted").length + db.getData("/product/permitted").length;
                 } catch {
-                    productCnt = 0;
+                    try {
+                        productCnt = db.getData("/product/notPermitted").length
+                    } catch {
+                        productCnt = 0;
+                    }
                 }
             }
+
 
             const object = {
                 id: productCnt + 1,
@@ -101,30 +108,71 @@ export class ProductsService {
 
     update(@Request() req, @Body() updateData: UpdateProductDto) {
         if (req.forwardingUser.authority === "editor") {
+            try {
+                if (db.getIndex("/product/notPermitted", updateData.id) !== -1) {
+                    const product = db.getData("/product/notPermitted[" + db.getIndex("/product/notPermitted", updateData.id) + "]");
+                    db.delete("/product/notPermitted[" + db.getIndex("/product/notPermitted", updateData.id) + "]");
 
-            if (db.getIndex("/product/notPermitted", updateData.id) !== -1) {
-                const product = db.getData("/product/notPermitted[" + db.getIndex("/product/notPermitted", updateData.id) + "]");
-                db.delete("/product/notPermitted[" + db.getIndex("/product/notPermitted", updateData.id) + "]");
+                    if (updateData.permission === false)
+                        db.push("/product/notPermitted[]", {...product, ...updateData}, true);
+                    else
+                        db.push("/product/permitted[]", {...product, ...updateData}, true);
 
-                if (updateData.permission === false)
-                    db.push("/product/notPermitted[]", {...product, ...updateData}, true);
-                else
-                    db.push("/product/permitted[]", {...product, ...updateData}, true);
+                    return 'updated';
+                } else {
+                    throw new NotFoundException(`products not found.`);
+                }
+            } catch {
+                try {
+                    if (db.getIndex("/product/permitted", updateData.id) !== -1) {
+                        const product = db.getData("/product/permitted[" + db.getIndex("/product/permitted", updateData.id) + "]");
+                        db.delete("/product/permitted[" + db.getIndex("/product/permitted", updateData.id) + "]");
 
-                return 'updated';
-            } else if (db.getIndex("/product/permitted", updateData.id) !== -1) {
-                const product = db.getData("/product/permitted[" + db.getIndex("/product/permitted", updateData.id) + "]");
-                db.delete("/product/permitted[" + db.getIndex("/product/permitted", updateData.id) + "]");
+                        if (updateData.permission === false)
+                            db.push("/product/notPermitted[]", {...product, ...updateData}, true);
+                        else
+                            db.push("/product/permitted[]", {...product, ...updateData}, true);
 
-                if (updateData.permission === false)
-                    db.push("/product/notPermitted[]", {...product, ...updateData}, true);
-                else
-                    db.push("/product/permitted[]", {...product, ...updateData}, true);
+                        return 'updated';
+                    } else {
+                        throw new NotFoundException(`products not found.`);
+                    }
+                } catch {
+                    throw new NotFoundException(`products not found.`);
+                }
+            }
+        } else {
+            throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);
+        }
 
-                return 'updated';
-            } else {
-                throw new NotFoundException(`products not found.`);
+    }
 
+    delete(@Request() req, @Body() deleteData: DeleteProductDto) {
+        if (req.forwardingUser.authority === "editor") {
+            try {
+                if (db.getIndex("/product/notPermitted", deleteData.id) !== -1) {
+                    const product = db.getData("/product/notPermitted[" + db.getIndex("/product/notPermitted", deleteData.id) + "]");
+                    db.delete("/product/notPermitted[" + db.getIndex("/product/notPermitted", deleteData.id) + "]");
+                    db.push("/product/deleted[]", {...product}, true);
+
+                    return 'deleted';
+                } else {
+                    throw new NotFoundException(`products not found.`);
+                }
+            } catch {
+                try {
+                    if (db.getIndex("/product/permitted", deleteData.id) !== -1) {
+                        const product = db.getData("/product/permitted[" + db.getIndex("/product/permitted", deleteData.id) + "]");
+                        db.delete("/product/permitted[" + db.getIndex("/product/permitted", deleteData.id) + "]");
+                        db.push("/product/deleted[]", {...product}, true);
+
+                        return 'deleted';
+                    } else {
+                        throw new NotFoundException(`products not found.`);
+                    }
+                } catch {
+                    throw new NotFoundException(`products not found.`);
+                }
             }
         } else {
             throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);

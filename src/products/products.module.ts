@@ -18,7 +18,8 @@ export class ProductsModule implements NestModule {
                 {path: 'products/notpermitted', method: RequestMethod.GET},
                 {path: 'products/permitted', method: RequestMethod.GET},
                 {path: 'products/update', method: RequestMethod.PATCH},
-                {path: 'products/marketlist', method: RequestMethod.GET}
+                {path: 'products/marketlist', method: RequestMethod.GET},
+                {path: 'products/delete', method: RequestMethod.DELETE}
             );
     }
 }

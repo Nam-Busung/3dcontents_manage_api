@@ -1,7 +1,8 @@
-import {Body, Controller, Get, Patch, Post, Request} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Patch, Post, Request} from '@nestjs/common';
 import {ProductsService} from './products.service';
 import {CreateProductDto} from './dto/create-product.dto'
 import {UpdateProductDto} from './dto/update-product.dto';
+import {DeleteProductDto} from './dto/delete-product.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -37,6 +38,10 @@ export class ProductsController {
     patch(@Request() req, @Body() productData: UpdateProductDto) {
         return this.productService.update(req, productData);
     }
-
+    //update(editor)
+    @Delete('/delete')
+    delete(@Request() req, @Body() productData: DeleteProductDto) {
+        return this.productService.delete(req, productData);
+    }
 
 }

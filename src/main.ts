@@ -6,12 +6,11 @@ import {AppModule} from './app.module';
 import {User} from './user/entities/user.entity'
 
 
-
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     //initial exchange rate
-    axios.get('https://api.exchangeratesapi.io/v1/latest?access_key=4708af6aa231c77ba5382e47695281ed')
+    axios.get('http://api.exchangeratesapi.io/v1/latest?access_key=4708af6aa231c77ba5382e47695281ed')
         .then(res => {
             db.push("/dollar", res.data.rates.USD / res.data.rates.KRW, true);
             db.push("/yuan", res.data.rates.CNY / res.data.rates.KRW, true);

@@ -9,8 +9,5 @@ export class CreateProductDto {
 
     @IsNumber()
     readonly price: number;
-
-    @IsOptional()
-    readonly user: object;
 }
 
