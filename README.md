@@ -10,5 +10,5 @@ to run
 -> will make ContentManageDB.json file and test user 1(artist),2(editor),3(client) will be added to it.
 
 
-to test<br/>(before test, delete 'ContentManageDB.json' or modify config.js file to create new json file with different name)
+to test<br/>(before test, delete 'ContentManageDB.json' or modify config.ts file to create new json file with different name)
 1. npm run test:watch
